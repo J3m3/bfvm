@@ -1,4 +1,4 @@
-use bfvm::*;
+use bfvm::interpret;
 use std::{env, fs, io::Result};
 
 fn main() -> Result<()> {
