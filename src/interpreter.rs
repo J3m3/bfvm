@@ -25,7 +25,7 @@ pub fn interpret(input: &str) -> Result<(), RuntimeError> {
                 dp -= operand;
             }
             OpKind::Right => {
-                if dp > MEM_SIZE - operand {
+                if dp + operand > MEM_SIZE {
                     return Err(RuntimeError::new(ip, "data pointer exceeded memory size"));
                 }
                 dp += operand;
