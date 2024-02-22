@@ -1,13 +1,13 @@
 use crate::ir::*;
 use crate::op::*;
 use crate::*;
+use std::io::{Read, Write};
 
-pub fn interpret(input: &str) -> Result<(), RuntimeError> {
-    use std::io::{stdin, stdout, Read, Write};
-
-    let mut stdin = stdin().lock();
-    let mut stdout = stdout().lock();
-
+pub fn interpret<R, W>(input: &str, mut stdin: R, mut stdout: W) -> Result<(), RuntimeError>
+where
+    R: Read,
+    W: Write,
+{
     let ops = generate_ops(input);
     let mut memory: Memory = [0; MEM_SIZE];
     let mut ip = 0; // TODO: use origianl ip without aggregation for better DX

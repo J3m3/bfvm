@@ -1,4 +1,5 @@
 use bfvm::interpret;
+use std::io::{stdin, stdout};
 use std::{env, fs, io::Result};
 
 fn main() -> Result<()> {
@@ -10,7 +11,10 @@ fn main() -> Result<()> {
 
     let file_path = &args[1];
     let contents = fs::read_to_string(file_path)?;
-    match interpret(&contents) {
+
+    let stdin = stdin().lock();
+    let stdout = stdout().lock();
+    match interpret(&contents, stdin, stdout) {
         Err(e) => eprintln!("{e}"),
         _ => {}
     }
