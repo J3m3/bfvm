@@ -78,3 +78,65 @@ where
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Cursor;
+
+    // Helper function to simplify tests
+    fn run_interpret(
+        input_program: &str,
+        input_data: &[u8],
+    ) -> (Result<(), RuntimeError>, Vec<u8>) {
+        let mut output_buffer = Vec::new();
+        let result = interpret(input_program, Cursor::new(input_data), &mut output_buffer);
+        (result, output_buffer)
+    }
+
+    #[test]
+    fn should_interpret_basic_operations() {
+        let (result, _output) = run_interpret("++>---<+", &[]);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn should_report_error_on_data_pointer_underflow() {
+        let (result, _) = run_interpret("<", &[]);
+        match result {
+            Err(e) => assert!(e.message.contains("data pointer is negative")),
+            _ => panic!("Expected a runtime error for data pointer underflow"),
+        }
+    }
+
+    #[test]
+    fn should_report_error_on_data_pointer_overflow() {
+        let input = ">".repeat(MEM_SIZE + 1);
+        let (result, _) = run_interpret(&input, &[]);
+        match result {
+            Err(e) => assert!(e.message.contains("data pointer exceeded memory size")),
+            _ => panic!("Expected a runtime error for data pointer overflow"),
+        }
+    }
+
+    #[test]
+    fn should_interpret_loops_correctly() {
+        let (result, _output) = run_interpret("++[->+<]", &[]);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn should_handle_input_and_output() {
+        let input_program = ",.";
+        let input_data = [65]; // ASCII code for 'A'
+        let (result, output) = run_interpret(input_program, &input_data);
+        assert!(result.is_ok());
+        assert_eq!(output, input_data, "The output should match the input.");
+    }
+
+    #[test]
+    fn should_interpret_complex_program() {
+        let (result, _) = run_interpret("++[->+<]>++.", &[]);
+        assert!(result.is_ok());
+    }
+}
