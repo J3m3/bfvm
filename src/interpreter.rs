@@ -10,7 +10,7 @@ pub fn interpret(input: &str) -> Result<(), RuntimeError> {
 
     let ops = generate_ops(input);
     let mut memory: Memory = [0; MEM_SIZE];
-    let mut ip = 0;
+    let mut ip = 0; // TODO: use origianl ip without aggregation for better DX
     let mut dp = 0;
 
     while let Some(op) = ops.get(ip) {
