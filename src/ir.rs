@@ -4,7 +4,7 @@ use crate::*;
 
 pub fn generate_ops(input: &str) -> Vec<Op> {
     let lexer = Lexer::new(input);
-    let mut addr_stack: BackPatchingStack = Vec::new();
+    let mut backpatches = BackPatchingStack::new();
 
     let commands = lexer
         .enumerate()
@@ -20,10 +20,10 @@ pub fn generate_ops(input: &str) -> Vec<Op> {
             }
 
             if op_kind == OpKind::Jeq0Forward {
-                addr_stack.push(acc.len() as i32);
+                backpatches.push(acc.len() as i32);
             } else if op_kind == OpKind::Jne0Backward {
                 let curr = acc.len() as i32;
-                let matching = addr_stack.pop().expect(&format!(
+                let matching = backpatches.pop().expect(&format!(
                     "invalid program: `[` and `]` should match (`]` exceeds) [IDX:{idx}]"
                 ));
 
@@ -44,10 +44,10 @@ pub fn generate_ops(input: &str) -> Vec<Op> {
             acc
         });
 
-    if !addr_stack.is_empty() {
+    if !backpatches.is_empty() {
         panic!(
             "invalid program: `[` and `]` should match ({} `[`s left)",
-            addr_stack.len()
+            backpatches.len()
         );
     }
     commands
