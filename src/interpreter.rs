@@ -1,7 +1,33 @@
 use crate::ir::*;
 use crate::op::*;
 use crate::*;
+use std::fmt;
 use std::io::{Read, Write};
+
+#[derive(Debug)]
+pub struct RuntimeError {
+    message: String,
+}
+
+impl RuntimeError {
+    fn with_ip(ip: usize, message: &str) -> Self {
+        RuntimeError {
+            message: format!("{message} [IP:{ip}]"),
+        }
+    }
+}
+
+impl fmt::Display for RuntimeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "RUNTIME ERROR: {}", self.message)
+    }
+}
+
+impl From<RuntimeError> for std::io::Error {
+    fn from(value: RuntimeError) -> Self {
+        value.into()
+    }
+}
 
 pub fn interpret<R, W>(input: &str, mut stdin: R, mut stdout: W) -> Result<(), RuntimeError>
 where
@@ -20,13 +46,16 @@ where
             OpKind::Dec => memory[dp] -= op.operand,
             OpKind::Left => {
                 if dp < operand {
-                    return Err(RuntimeError::new(ip, "data pointer is negative"));
+                    return Err(RuntimeError::with_ip(ip, "data pointer is negative"));
                 }
                 dp -= operand;
             }
             OpKind::Right => {
                 if dp + operand > MEM_SIZE {
-                    return Err(RuntimeError::new(ip, "data pointer exceeded memory size"));
+                    return Err(RuntimeError::with_ip(
+                        ip,
+                        "data pointer exceeded memory size",
+                    ));
                 }
                 dp += operand;
             }
@@ -34,7 +63,7 @@ where
                 for _ in 0..operand {
                     let mut byte = [0; 1];
                     stdin.read_exact(&mut byte[0..1]).map_err(|e| {
-                        RuntimeError::new(ip, &format!("cannot read from stdin ({e})"))
+                        RuntimeError::with_ip(ip, &format!("cannot read from stdin ({e})"))
                     })?;
                     memory[dp] = byte[0] as i32;
                 }
@@ -42,19 +71,22 @@ where
             OpKind::Output => {
                 for _ in 0..operand {
                     let byte: u8 = memory[dp].try_into().map_err(|_| {
-                        RuntimeError::new(ip, "cannot reinterpret the byte into char")
+                        RuntimeError::with_ip(ip, "cannot reinterpret the byte into char")
                     })?;
                     if !byte.is_ascii() {
-                        return Err(RuntimeError::new(ip, "the value is not in the ASCII range"));
+                        return Err(RuntimeError::with_ip(
+                            ip,
+                            "the value is not in the ASCII range",
+                        ));
                     }
                     write!(stdout, "{}", char::from(byte)).map_err(|e| {
-                        RuntimeError::new(ip, &format!("cannot write to stdout ({e})"))
+                        RuntimeError::with_ip(ip, &format!("cannot write to stdout ({e})"))
                     })?;
                 }
             }
             OpKind::Jeq0Forward => {
                 if MEM_SIZE < operand {
-                    return Err(RuntimeError::new(ip, "instruction pointer is negative"));
+                    return Err(RuntimeError::with_ip(ip, "instruction pointer is negative"));
                 }
                 if memory[dp] == 0 {
                     ip = operand;
@@ -63,7 +95,7 @@ where
             }
             OpKind::Jne0Backward => {
                 if ops.len() < operand {
-                    return Err(RuntimeError::new(
+                    return Err(RuntimeError::with_ip(
                         ip,
                         "instruction pointer exceeded instruction buffer",
                     ));
