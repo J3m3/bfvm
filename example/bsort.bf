@@ -1,6 +1,6 @@
 [
-  NOTE: provide null character end of the input
-  ex. echo "4213\0" | cargo run -q -- ./example/bsort.bf
+  example.
+  $ echo "4213" | cargo run -q -- ./example/bsort.bf
 ]
 
 [bsort.b -- bubble sort
