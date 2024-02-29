@@ -2,6 +2,7 @@ use crate::lexer::*;
 use crate::op::*;
 use crate::*;
 
+// TODO: return Err instead of panic
 pub fn generate_ops(input: &str) -> Vec<Op> {
     let lexer = Lexer::new(input);
     let mut backpatches = BackPatchingStack::new();
