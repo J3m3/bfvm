@@ -1,6 +1,6 @@
-use bfvm::interpret;
-use std::io::{stdin, stdout};
-use std::{env, fs, io::Result};
+use bfvm::{interpret, Memory, MEM_SIZE};
+use std::io::{stdin, stdout, Result};
+use std::{env, fs};
 
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -10,14 +10,13 @@ fn main() -> Result<()> {
     }
 
     let file_path = &args[1];
-    let contents = fs::read_to_string(file_path)?;
+    let input = fs::read_to_string(file_path)?;
+
+    let mut memory: Memory = [0; MEM_SIZE];
 
     let stdin = stdin().lock();
     let stdout = stdout().lock();
-    match interpret(&contents, stdin, stdout) {
-        Err(e) => eprintln!("{e}"),
-        _ => {}
-    }
+    interpret(&input, &mut memory, stdin, stdout)?;
 
     Ok(())
 }

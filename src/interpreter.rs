@@ -29,13 +29,17 @@ impl From<RuntimeError> for std::io::Error {
     }
 }
 
-pub fn interpret<R, W>(input: &str, mut stdin: R, mut stdout: W) -> Result<(), RuntimeError>
+pub fn interpret<R, W>(
+    input: &str,
+    memory: &mut Memory,
+    mut stdin: R,
+    mut stdout: W,
+) -> Result<(), RuntimeError>
 where
     R: Read,
     W: Write,
 {
     let ops = generate_ops(input);
-    let mut memory: Memory = [0; MEM_SIZE];
     let mut ip = 0; // TODO: use origianl ip without aggregation for better DX
     let mut dp = 0;
 
@@ -120,21 +124,27 @@ mod tests {
     fn run_interpret(
         input_program: &str,
         input_data: &[u8],
-    ) -> (Result<(), RuntimeError>, Vec<u8>) {
+    ) -> (Result<(), RuntimeError>, Vec<u8>, Memory) {
         let mut output_buffer = Vec::new();
-        let result = interpret(input_program, Cursor::new(input_data), &mut output_buffer);
-        (result, output_buffer)
+        let mut memory: Memory = [0; MEM_SIZE];
+        let result = interpret(
+            input_program,
+            &mut memory,
+            Cursor::new(input_data),
+            &mut output_buffer,
+        );
+        (result, output_buffer, memory)
     }
 
     #[test]
     fn should_interpret_basic_operations() {
-        let (result, _output) = run_interpret("++>---<+", &[]);
+        let (result, ..) = run_interpret("++>---<+", &[]);
         assert!(result.is_ok());
     }
 
     #[test]
     fn should_report_error_on_data_pointer_underflow() {
-        let (result, _) = run_interpret("<", &[]);
+        let (result, ..) = run_interpret("<", &[]);
         match result {
             Err(e) => assert!(e.message.contains("data pointer is negative")),
             _ => panic!("Expected a runtime error for data pointer underflow"),
@@ -144,7 +154,7 @@ mod tests {
     #[test]
     fn should_report_error_on_data_pointer_overflow() {
         let input = ">".repeat(MEM_SIZE + 1);
-        let (result, _) = run_interpret(&input, &[]);
+        let (result, ..) = run_interpret(&input, &[]);
         match result {
             Err(e) => assert!(e.message.contains("data pointer exceeded memory size")),
             _ => panic!("Expected a runtime error for data pointer overflow"),
@@ -153,7 +163,7 @@ mod tests {
 
     #[test]
     fn should_interpret_loops_correctly() {
-        let (result, _output) = run_interpret("++[->+<]", &[]);
+        let (result, ..) = run_interpret("++[->+<]", &[]);
         assert!(result.is_ok());
     }
 
@@ -161,14 +171,14 @@ mod tests {
     fn should_handle_input_and_output() {
         let input_program = ",.";
         let input_data = [65]; // ASCII code for 'A'
-        let (result, output) = run_interpret(input_program, &input_data);
+        let (result, output, ..) = run_interpret(input_program, &input_data);
         assert!(result.is_ok());
         assert_eq!(output, input_data, "The output should match the input.");
     }
 
     #[test]
     fn should_interpret_complex_program() {
-        let (result, _) = run_interpret("++[->+<]>++.", &[]);
+        let (result, ..) = run_interpret("++[->+<]>++.", &[]);
         assert!(result.is_ok());
     }
 }
