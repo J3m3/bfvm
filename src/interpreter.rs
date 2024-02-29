@@ -60,7 +60,7 @@ where
             OpKind::Input => {
                 for _ in 0..operand {
                     let mut byte = [0; 1];
-                    stdin.read_exact(&mut byte[0..1]).map_err(|e| {
+                    stdin.read(&mut byte[0..1]).map_err(|e| {
                         RuntimeError::with_ip(ip, &format!("cannot read from stdin ({e})"))
                     })?;
                     memory[dp] = byte[0] as i32;
