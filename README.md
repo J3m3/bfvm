@@ -12,7 +12,7 @@
 1. Clone this Repository
 
 ```console
-git clone --depth=1 git@github.com:J3m3/hason.git bfvm
+git clone --depth=1 git@github.com:J3m3/bfvm.git bfvm
 cd bfvm
 ```
 
