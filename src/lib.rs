@@ -5,8 +5,7 @@ mod op;
 
 pub use interpreter::interpret;
 
-
 const MEM_SIZE: usize = 2usize.pow(16);
-type Memory = [i32; MEM_SIZE];
+pub type Memory = [op::Operand; MEM_SIZE];
 
-type BackPatchingStack = Vec<i32>;
+type BackPatchingStack = Vec<op::Operand>;

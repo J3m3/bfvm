@@ -20,9 +20,9 @@ pub fn generate_ops(input: &str) -> Vec<Op> {
             }
 
             if op_kind == OpKind::Jeq0Forward {
-                backpatches.push(acc.len() as i32);
+                backpatches.push(acc.len() as Operand);
             } else if op_kind == OpKind::Jne0Backward {
-                let curr = acc.len() as i32;
+                let curr = acc.len() as Operand;
                 let matching = backpatches.pop().expect(&format!(
                     "invalid program: `[` and `]` should match (`]` exceeds) [IDX:{idx}]"
                 ));

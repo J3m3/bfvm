@@ -10,8 +10,10 @@ pub enum OpKind {
     Jne0Backward,
 }
 
+pub type Operand = i32;
+
 #[derive(Debug, PartialEq)]
 pub struct Op {
     pub kind: OpKind,
-    pub operand: i32,
+    pub operand: Operand,
 }
