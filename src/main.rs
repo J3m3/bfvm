@@ -16,7 +16,9 @@ fn main() -> Result<()> {
 
     let stdin = stdin().lock();
     let stdout = stdout().lock();
-    interpret(&input, &mut memory, stdin, stdout)?;
+    if let Err(e) = interpret(&input, &mut memory, stdin, stdout) {
+        eprintln!("{e}");
+    }
 
     Ok(())
 }

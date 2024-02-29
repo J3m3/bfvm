@@ -23,12 +23,6 @@ impl fmt::Display for RuntimeError {
     }
 }
 
-impl From<RuntimeError> for std::io::Error {
-    fn from(value: RuntimeError) -> Self {
-        value.into()
-    }
-}
-
 pub fn interpret<R, W>(
     input: &str,
     memory: &mut Memory,
