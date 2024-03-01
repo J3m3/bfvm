@@ -123,6 +123,7 @@ pub fn jit_compile(input: &str, memory: &mut Memory) -> Result<Mmap, JitCompileE
                 }
             }
             OpKind::Output => {
+                // TODO: use buffer for optimization
                 for _ in 0..operand {
                     raw_code.extend_from_slice(&codegen::syscall_write());
                 }

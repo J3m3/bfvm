@@ -67,6 +67,7 @@ where
                 }
             }
             OpKind::Output => {
+                // TODO: use buffer for optimization
                 for _ in 0..operand {
                     let byte: u8 = memory[dp].try_into().map_err(|_| {
                         RuntimeError::with_ip(ip, "cannot reinterpret the byte into char")
